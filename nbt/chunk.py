@@ -64,7 +64,7 @@ block_ids = {
      60: 'farmland',
      61: 'furnace',
      62: 'furnace',
-     63: 'sign',  # will change to oak_sign in 1.14
+     63: 'oak_sign',  # will change to oak_sign in 1.14
      64: 'oak_door',
      65: 'ladder',
      66: 'rail',
@@ -144,10 +144,9 @@ class AnvilSection(object):
 
         # Is the section flattened ?
         # See https://minecraft.gamepedia.com/1.13/Flattening
-
         if version == 0:
             self._init_array(nbt)
-        elif version == 1631:  # MC 1.13
+        elif version >= 1631:  # MC 1.13
             self._init_index(nbt)
         else:
             raise NotImplemented
@@ -179,7 +178,6 @@ class AnvilSection(object):
     # Contains palette of block names and indexes
 
     def _init_index(self, nbt):
-
         for p in nbt['Palette']:
             name = p['Name'].value
             if name.startswith('minecraft:'):
@@ -251,7 +249,7 @@ class AnvilChunk(Chunk):
 
         try:
             version = nbt['DataVersion'].value
-            if version < 1631 or version > 1631:
+            if version < 1631 or version > 16310:
                 raise NotImplemented
         except KeyError:
             version = 0
@@ -260,6 +258,10 @@ class AnvilChunk(Chunk):
 
         self.sections = {}
         for s in self.chunk_data['Sections']:
+            try:
+                s["Palette"]
+            except:
+                continue
             self.sections[s['Y'].value] = AnvilSection(s, version)
 
 
